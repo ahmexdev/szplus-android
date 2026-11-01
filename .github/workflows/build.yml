@@ -5,7 +5,7 @@ on:
       zip_name:
         description: Exact name of the zip to build
         required: true
-        default: SzPlusAndroid-improved-2.zip
+        default: SzPlusAndroid-improved-3.zip
 jobs:
   build:
     runs-on: ubuntu-latest
