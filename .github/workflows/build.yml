@@ -1,16 +1,22 @@
 name: Build APK from zip
 on:
   workflow_dispatch:
+    inputs:
+      zip_name:
+        description: "Exact name of the zip to build"
+        required: true
+        default: "SzPlusAndroid-improved-2.zip"
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Show files
+        run: ls -la
       - name: Unzip project
         run: |
-          ZIP=$(ls *.zip | head -n 1)
-          echo "Using: $ZIP"
-          unzip -q "$ZIP" -d project
+          echo "Building: ${{ github.event.inputs.zip_name }}"
+          unzip -q "${{ github.event.inputs.zip_name }}" -d project
           DIR=$(dirname "$(find project -name settings.gradle.kts | head -n 1)")
           echo "Project folder: $DIR"
           echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
@@ -22,7 +28,7 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: "8.9"
+          gradle-version: "8.10.2"
       - name: Build release APK
         working-directory: ${{ env.PROJECT_DIR }}
         run: gradle --no-daemon assembleRelease
