@@ -11,14 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Show files
-        run: ls -la
       - name: Unzip project
         run: |
-          echo "Building: ${{ github.event.inputs.zip_name }}"
           unzip -q "${{ github.event.inputs.zip_name }}" -d project
           DIR=$(dirname "$(find project -name settings.gradle.kts | head -n 1)")
-          echo "Project folder: $DIR"
           echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
@@ -31,7 +27,10 @@ jobs:
           gradle-version: "8.10.2"
       - name: Build release APK
         working-directory: ${{ env.PROJECT_DIR }}
-        run: gradle --no-daemon assembleRelease
+        run: gradle --no-daemon assembleRelease > ../build.log 2>&1
+      - name: SHOW ERRORS
+        if: failure()
+        run: grep -E "^e: |error:|FAILURE|What went wrong|Execution failed" -A2 project/build.log | head -60
       - uses: actions/upload-artifact@v4
         with:
           name: SzPlus-apk
