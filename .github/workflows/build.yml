@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Unzip project
-        run: unzip -q SzPlus-Android-project.zip
+        run: unzip -q SzPlus-Android-project-2.zip
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
