@@ -7,19 +7,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Unzip project
-        run: unzip -q SzPlus-Android-project-2.zip
+        run: |
+          ZIP=$(ls *.zip | head -n 1)
+          echo "Using: $ZIP"
+          unzip -q "$ZIP" -d project
+          DIR=$(dirname "$(find project -name settings.gradle.kts | head -n 1)")
+          echo "Project folder: $DIR"
+          echo "PROJECT_DIR=$DIR" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null || true
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
       - name: Build release APK
-        working-directory: SzPlus-Android
+        working-directory: ${{ env.PROJECT_DIR }}
         run: gradle --no-daemon assembleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: SzPlus-apk
-          path: SzPlus-Android/app/build/outputs/apk/release/*.apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/release/*.apk
